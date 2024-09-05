@@ -1,4 +1,3 @@
-
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../model/tasks.dart';
@@ -33,7 +32,7 @@ class DatabaseServices {
       onCreate: (db, version) {
         db.execute('''
         CREATE TABLE $_taskTableName(
-        $_taskIdColumnName STRING PRIMARY KEY ,
+        $_taskIdColumnName INTEGER PRIMARY KEY AUTOINCREMENT ,
         $_taskTitleColumnName STRING NOT NULL,
         $_taskContentColumnName STRING NOT NULL,
         $_taskDateColumnName STRING NOT NULL,
@@ -50,7 +49,6 @@ class DatabaseServices {
   }
 
   void addTask(
-      String id,
     String title,
     String content,
     String date,
@@ -62,7 +60,6 @@ class DatabaseServices {
     await db.insert(
       _taskTableName,
       {
-        _taskIdColumnName:id,
         _taskTitleColumnName: title,
         _taskContentColumnName: content,
         _taskDateColumnName: date,
@@ -79,55 +76,61 @@ class DatabaseServices {
     final data = await db.query(_taskTableName);
     List<Task> task = data
         .map((e) => Task(
-        id: e["id"] as String,
-        title: e["title"] as String,
-      content: e["content"] as String,
-        date: e["date"] as String,
-        time: e["time"] as String,
-        repeat: e["repeat"] as String,
-        category: e["category"] as String,
-        isCompleted: e["isCompleted"] as int,
-        ))
+              id: e["id"] as int,
+              title: e["title"] as String,
+              content: e["content"] as String,
+              date: e["date"] as String,
+              time: e["time"] as String,
+              repeat: e["repeat"] as String,
+              category: e["category"] as String,
+              isCompleted: e["isCompleted"] as int,
+            ))
         .toList();
     return task;
   }
 
   Future<List<Task>> getTasksByCategory(String category) async {
     final db = await database;
-    final data = await db.query(_taskTableName,where: 'category=?',whereArgs: [category], orderBy: _taskIsCompletedColumnName);
+    final data = await db.query(_taskTableName,
+        where: 'category=?',
+        whereArgs: [category],
+        orderBy: _taskIsCompletedColumnName);
     List<Task> task = data
         .map((e) => Task(
-      id: e["id"] as String,
-      title: e["title"] as String,
-      content: e["content"] as String,
-      date: e["date"] as String,
-      time: e["time"] as String,
-      repeat: e["repeat"] as String,
-      category: e["category"] as String,
-      isCompleted: e["isCompleted"] as int,
-    ))
+              id: e["id"] as int,
+              title: e["title"] as String,
+              content: e["content"] as String,
+              date: e["date"] as String,
+              time: e["time"] as String,
+              repeat: e["repeat"] as String,
+              category: e["category"] as String,
+              isCompleted: e["isCompleted"] as int,
+            ))
         .toList();
     return task;
   }
 
-  void updateComplete(String id, int isComplete) async{
+  void updateComplete(int id, int isComplete) async {
     final db = await database;
-    await db.update(_taskTableName, {
-      _taskIsCompletedColumnName: isComplete,
-    },
-      where: 'id = ?',
-      whereArgs: [
-        id,
-      ]
-    );
-
+    await db.update(
+        _taskTableName,
+        {
+          _taskIsCompletedColumnName: isComplete,
+        },
+        where: 'id = ?',
+        whereArgs: [
+          id,
+        ]);
   }
-  void deleteTask(String id) async {
+
+  void deleteTask(int id) async {
     final db = await database;
     await db.delete(
       _taskTableName,
       where: 'id = ?',
-      whereArgs: [id,],
+      whereArgs: [
+        id,
+      ],
     );
   }
 }

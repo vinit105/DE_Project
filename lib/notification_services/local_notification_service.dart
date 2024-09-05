@@ -1,16 +1,15 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'dart:math';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-
 class LocalNotificationService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   static StreamController<NotificationResponse> streamController =
-  StreamController();
+      StreamController();
 
   static onTap(NotificationResponse notificationResponse) {
     streamController.add(notificationResponse);
@@ -35,17 +34,17 @@ class LocalNotificationService {
         'default', 'default',
         importance: Importance.max,
         priority: Priority.high,
+        icon: 'mipmap/launcher_icon',
+        largeIcon: const DrawableResourceAndroidBitmap('mipmap/launcher_icon'),
         sound:
-        RawResourceAndroidNotificationSound('sound.wav'
-            .split('.')
-            .first));
+            RawResourceAndroidNotificationSound('sound.wav'.split('.').first));
     NotificationDetails details = NotificationDetails(
       android: android,
     );
     await flutterLocalNotificationsPlugin.show(
       10,
-      'Sample Notification',
-      'Basic',
+      'Basic Notification',
+      'Task Reminder',
       details,
       payload: "Payload Data",
     );
@@ -54,65 +53,94 @@ class LocalNotificationService {
   initializeNotification() async {
     //tz.initializeTimeZones();
     // this is for latest iOS settings
-    _configurLocalTimezone();
-
+    _configureLocalTimezone();
   }
 
-//1.setup. [Done]
-//2.Basic Notification. [Done]
-//3.Repeated Notification. [Done]
-//4.Scheduled Notification. [Done]
-//5.Custom Sound. [Done]
-//6.on Tab. [Done]
-//7.Daily Notifications at specific time. [Done]
-//8.Real Example in To Do App.
-
-  tz.TZDateTime _convertTime(int day, int hour, int minutes){
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduleTime = tz.TZDateTime(tz.local,now.year, now.month, now.day,hour, minutes,);
-    if(scheduleTime.isBefore(now)){
-      scheduleTime = scheduleTime.add(const Duration(days: 1));
-    }
-    return scheduleTime;
-  }
-
-  Future<void> _configurLocalTimezone() async{
+  Future<void> _configureLocalTimezone() async {
     tz.initializeTimeZones();
-    final String timeXone = await FlutterNativeTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation(timeXone));
-
+    final String timezone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timezone));
   }
 
-   void myShowSchduledNotification(int day,int hours, int minutes, String title, String content) async {
-    print("days ${day}hours ${hours} minutes ${minutes}");
-    AndroidNotificationDetails android = AndroidNotificationDetails(
-      'default',
-      'id 3',
-      importance: Importance.max,
-      priority: Priority.high,
-      color: Colors.teal,
-        sound:
-        RawResourceAndroidNotificationSound('sound.wav'
-            .split('.')
-            .first)
-    );
-    // );
-    NotificationDetails details =  NotificationDetails(
-      android: android,
-    );
+  final FlutterLocalNotificationsPlugin notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  Future<void> notificationScheduled(
+      {int id = 0,
+      String? title,
+      String? body,
+      required bool isAction,
+      String? payLoad,
+      required DateTime scheduledNotificationDateTime}) async {
     tz.initializeTimeZones();
+
     tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      20,
-     title,
-      content,
-     _convertTime(day,hours,minutes+1),
-      details,
-      payload: content,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time
-    );
+    return notificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(
+          scheduledNotificationDateTime,
+          tz.local,
+        ),
+        await notificationDetails(isAction),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time);
   }
 
+  notificationDetails(bool isAction) {
+    return NotificationDetails(
+        android: AndroidNotificationDetails(
+          getRandomString(8),
+          'taskReminder',
+          playSound: true,
+          priority: Priority.high,
+          icon: 'mipmap/launcher_icon',
+          actions: isAction
+              ? <AndroidNotificationAction>[
+                  const AndroidNotificationAction(
+                    "id",
+                    "Mark as Complete",
+                    showsUserInterface: true,
+                  ),
+                ]
+              : null,
+          importance: Importance.max,
+          sound:
+              RawResourceAndroidNotificationSound('sound.wav'.split('.').first),
+        ),
+        iOS: const DarwinNotificationDetails());
+  }
+
+  Future<void> initNotification() async {
+    AndroidInitializationSettings initializationSettingsAndroid =
+        const AndroidInitializationSettings('@drawable/launch');
+
+    var initializationSettingsIOS = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+        onDidReceiveLocalNotification:
+            (int id, String? title, String? body, String? payload) async {});
+
+    var initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    await notificationsPlugin.initialize(initializationSettings,
+        onDidReceiveNotificationResponse:
+            (NotificationResponse notificationResponse) async {});
+  }
+
+  cancel() {
+    notificationsPlugin.cancelAll();
+    flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+
+  static const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  Random _rnd = Random();
+
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 }

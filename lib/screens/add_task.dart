@@ -1,10 +1,10 @@
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/notification_services/local_notification_service.dart';
 import 'package:task_manager/provider/task_provider.dart';
 import 'package:task_manager/screens/homepage.dart';
-
 import '../services/database_services.dart';
 import '../ui/input_fields.dart';
 
@@ -16,12 +16,14 @@ class AddTask extends StatefulWidget {
 }
 
 class _AddTaskState extends State<AddTask> {
-  var notifiyerHelper = LocalNotificationService();
+  var notifyHelper = LocalNotificationService();
   final DatabaseServices _databaseServices = DatabaseServices.instance;
 
+  TimeOfDay? pickedTime = TimeOfDay.now();
+  DateTime variable =DateTime.now().add(const Duration(minutes: 2));
   DateTime selectedDate = DateTime.now();
   String startTime = DateFormat("hh:mm a")
-      .format(DateTime.now().add(const Duration(minutes: 1)));
+      .format(DateTime.now().add(const Duration(minutes: 2)));
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
@@ -39,8 +41,9 @@ class _AddTaskState extends State<AddTask> {
   @override
   Widget build(BuildContext context) {
     return Consumer<TaskProvider>(
-      builder: (BuildContext context, TaskProvider taskProvider, Widget? child) =>
-          Scaffold(
+      builder:
+          (BuildContext context, TaskProvider taskProvider, Widget? child) =>
+              Scaffold(
         // floatingActionButton: FloatingActionButton(
         //   backgroundColor: Colors.teal,
         //   onPressed: () {
@@ -50,13 +53,12 @@ class _AddTaskState extends State<AddTask> {
         //   child: const Icon(Icons.add, color: Colors.white,),
         // ),
         appBar: AppBar(
-
-          iconTheme: IconThemeData(color: Colors.black),
+          iconTheme: const IconThemeData(color: Colors.black),
           title: const Text(
             "Add Reminder",
             style: TextStyle(fontSize: 22, color: Colors.white),
           ),
-            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         ),
         body: Container(
           padding: const EdgeInsets.only(left: 20, right: 20),
@@ -67,7 +69,10 @@ class _AddTaskState extends State<AddTask> {
               children: [
                 const Text(
                   "Add Task",
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold,color: Colors.black),
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                 ),
                 MyInputField(
                   title: "Title*",
@@ -85,7 +90,7 @@ class _AddTaskState extends State<AddTask> {
                   title: "Date",
                   hint: DateFormat.yMEd().format(selectedDate),
                   widget: IconButton(
-                    icon:  Icon(
+                    icon: Icon(
                       Icons.calendar_month,
                       color: Colors.grey.shade600,
                     ),
@@ -99,7 +104,7 @@ class _AddTaskState extends State<AddTask> {
                   title: "Time",
                   hint: startTime,
                   widget: IconButton(
-                    icon:  Icon(
+                    icon: Icon(
                       Icons.access_time_rounded,
                       color: Colors.grey.shade600,
                     ),
@@ -114,7 +119,7 @@ class _AddTaskState extends State<AddTask> {
                   widget: Container(
                     padding: const EdgeInsets.only(right: 8),
                     child: DropdownButton(
-                      icon:  Icon(
+                      icon: Icon(
                         Icons.arrow_drop_down_sharp,
                         color: Colors.grey.shade600,
                       ),
@@ -147,7 +152,7 @@ class _AddTaskState extends State<AddTask> {
                   widget: Container(
                     padding: const EdgeInsets.only(right: 8),
                     child: DropdownButton(
-                      icon:  Icon(
+                      icon: Icon(
                         Icons.arrow_drop_down_sharp,
                         color: Colors.grey.shade600,
                       ),
@@ -182,7 +187,8 @@ class _AddTaskState extends State<AddTask> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       FloatingActionButton(
-                        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                        backgroundColor:
+                            Theme.of(context).appBarTheme.backgroundColor,
                         elevation: 5,
                         tooltip: 'Add',
                         onPressed: () {
@@ -205,22 +211,11 @@ class _AddTaskState extends State<AddTask> {
   }
 
   _validateDate(TaskProvider value) {
-//     DateTime startDate = DateFormat("hh:mma").parse(_startTime);
-//
-//     String _lastTime = DateFormat("hh:mma").format(DateTime.now());
-//     DateTime endDate =DateFormat("hh:mma").parse(_lastTime);
-//
-//     Duration dif = endDate.difference(startDate);
-//
-// // Print the result in any format you want
-//     print(dif.toString()); // 12:00:00.000000
-//     print(dif.inHours); // 12
-
-    if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty) {
+    if (_titleController.text.isNotEmpty && _noteController.text.isNotEmpty ) {
       // add tp database
       //  _addTaskToDb();
 
-      _databaseServices.addTask(_titleController.text,
+      _databaseServices.addTask(
           _titleController.text,
           _noteController.text,
           selectedDate.toString(),
@@ -228,24 +223,11 @@ class _AddTaskState extends State<AddTask> {
           value.selectRepeat,
           value.selectCategory);
 
-      notifiyerHelper.myShowSchduledNotification(
-          selectedDate.day,
-          int.parse(startTime.split(":")[0]),
-          int.parse(startTime.split(":")[1].split(" ")[0]),
-          _titleController.text,
-          _noteController.text);
-     Navigator.of(context).pop();
-      value.reset();
-      _titleController.clear();
-      _noteController.clear();
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder:(context) => const HomePage()));
+      notifyHelper.notificationScheduled(scheduledNotificationDateTime: variable,title: _titleController.text,body: _noteController.text, isAction: true);
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()));
     }
-    //
-    // if(dif.inSeconds >0){
-    //   _startTime =DateFormat("hh:mma").format(DateTime.now());
-    // }
 
-// Get the Duration using the diferrence method
   }
 
   _getDateFromUser(value) async {
@@ -255,31 +237,19 @@ class _AddTaskState extends State<AddTask> {
         firstDate: DateTime.now(),
         lastDate: DateTime(2100));
     if (pickedDate != null) {
-      selectedDate = pickedDate!;
+      selectedDate = pickedDate;
+      variable = DateTime(selectedDate.year,selectedDate.month,selectedDate.day,pickedTime!.hour,pickedTime!.minute);
       setState(() {});
     }
   }
 
   _getTimeFromUser(bool isStartTime, value) async {
-    var pickedTime = await _showTimePicker();
-    if (pickedTime == null) {
-      //print("time cancel");
-    } else if (pickedTime != null) {
-      startTime = pickedTime.format(context);
-      setState(() {});
-    }
+    pickedTime = await showTimePicker(context: context,initialTime: TimeOfDay.now());
+  if(pickedTime != null)  {
+    variable = DateTime(selectedDate.year,selectedDate.month,selectedDate.day,pickedTime!.hour,pickedTime!.minute);
+    startTime = variable.toString().split(" ")[1].split(".")[0];
+    setState(() {});
   }
 
-  _showTimePicker() {
-    return showTimePicker(
-        initialEntryMode: TimePickerEntryMode.dial,
-        context: context,
-        //     initialTime: TimeOfDay(
-        //         hour: int.parse(_startTime.split(":")[0]),
-        //         minute: int.parse(_startTime
-        //             .split(":")[2]
-        //             .split(" ")[0])) // _startTime --> 10:30 AM is integer
-        // );
-        initialTime: TimeOfDay.now());
   }
 }

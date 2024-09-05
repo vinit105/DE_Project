@@ -2,8 +2,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:task_manager/services/database_services.dart';
 
-import '../model/tasks.dart';
-
 class TaskProvider extends ChangeNotifier {
   String title = "";
   String content = "";
@@ -16,12 +14,13 @@ class TaskProvider extends ChangeNotifier {
   String selectRepeat = "None";
   String selectCategory = "Personal";
   bool setDarkMode = false;
+  bool cancelNotification = false;
 
 
   final DatabaseServices _databaseServices = DatabaseServices.instance;
 
 
-  delete(String id) {
+  delete(int id) {
     _databaseServices.deleteTask(id);
     notifyListeners();
   }
@@ -51,6 +50,11 @@ class TaskProvider extends ChangeNotifier {
 
    changeTheme(){
     setDarkMode = !setDarkMode;
+    notifyListeners();
+  }
+
+  isCancel(){
+    cancelNotification = !cancelNotification;
     notifyListeners();
   }
 

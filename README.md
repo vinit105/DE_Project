@@ -1,15 +1,31 @@
-# task_manager
+# Task Reminder Application
 
-A new Flutter project.
+Welcome to the Task Reminder Application! This Flutter app helps you keep track of your tasks with custom reminders. You can organize your tasks into three categories: Work, Personal, and Others. The app supports timely special reminders (e.g., 1 minute, 10 minutes, or 1 hour) and also features a dark mode option.
+
+## Features
+
+- **Custom Reminders:** Set reminders with a title, content, date, and time.
+- **Categorization:** Organize reminders into three categories - Work, Personal, and Others.
+- **Timely Special Reminders:** Choose from pre-defined reminder times such as 1 minute, 10 minutes, or 1 hour.
+- **Dark Mode:** Switch between light and dark modes for a personalized experience.
+- **Push Notifications:** Receive push notifications for your reminders.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+To get started with the Task Reminder Application, follow the instructions below.
 
-A few resources to get you started if this is your first Flutter project:
+### Prerequisites
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter 3.0.0 or later
+- Dart 2.18.0 or later
+- An IDE such as Visual Studio Code or Android Studio
+
+### Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/task-reminder-app.git
 
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,

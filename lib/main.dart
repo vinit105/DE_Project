@@ -15,7 +15,7 @@ late File file;
 late SharedPreferences sp;
 
 final imagePicker = ImagePicker();
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   dir = await getApplicationDocumentsDirectory();
   file = File("${dir.path}/userImage1");
@@ -38,13 +38,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context)=>TaskProvider())
-      ],
+      providers: [ChangeNotifierProvider(create: (context) => TaskProvider())],
       child: MaterialApp(
-       theme: Provider.of<ThemeProvider>(context).themeData,
+        theme: Provider.of<ThemeProvider>(context).themeData,
         darkTheme: dartTheme,
         debugShowCheckedModeBanner: false,
         home: const HomePage(),

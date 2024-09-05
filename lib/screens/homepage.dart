@@ -1,14 +1,14 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_manager/provider/task_provider.dart';
 import 'package:task_manager/screens/add_task.dart';
+import 'package:task_manager/screens/notification_screen.dart';
 import 'package:task_manager/screens/profile_page.dart';
+import 'package:task_manager/screens/reminders_screen.dart';
 import 'package:task_manager/screens/setting_page.dart';
 import '../model/tasks.dart';
 import '../notification_services/local_notification_service.dart';
 import '../notification_services/notification_details.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 
 import '../services/database_services.dart';
@@ -19,6 +19,7 @@ class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePageState();
 }
+
 class _HomePageState extends State<HomePage> {
   var notifyHelper = LocalNotificationService();
   final DatabaseServices _databaseServices = DatabaseServices.instance;
@@ -27,11 +28,12 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     //listenToNotificationStream();
-
+    //  _configureLocalTimeZone();
   }
+
   void listenToNotificationStream() {
     LocalNotificationService.streamController.stream.listen(
-          (notificationResponse) {
+      (notificationResponse) {
         //log(notificationResponse.id!.toString());
         //log(notificationResponse.payload!.toString());
         //logic to get product from database.
@@ -46,66 +48,66 @@ class _HomePageState extends State<HomePage> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<TaskProvider>(
-      builder: (BuildContext context, TaskProvider value, Widget? child) => DefaultTabController(
-      length: 3,
-      initialIndex: 0,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.background,
-          appBar: appBar(),
-          drawer: drawer(),
-          floatingActionButton: floatingActionButton(value),
-          body: TabBarView(
-            children: [
-              Center(
-                child: FutureBuilder(
-                  future: _databaseServices.getTasksByCategory("Personal"),
-                  builder: (context, snapshot) {
-                    return ListView.builder(
-                      itemCount: snapshot.data?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        Task task = snapshot.data![index];
-                        return getMyView(value, task);
-                      },
-                    );
-                  },
+      builder: (BuildContext context, TaskProvider value, Widget? child) =>
+          DefaultTabController(
+        length: 3,
+        initialIndex: 0,
+        child: Scaffold(
+            backgroundColor: Theme.of(context).colorScheme.background,
+            appBar: appBar(),
+            drawer: drawer(),
+            floatingActionButton: floatingActionButton(value),
+            body: TabBarView(
+              children: [
+                Center(
+                  child: FutureBuilder(
+                    future: _databaseServices.getTasksByCategory("Personal"),
+                    builder: (context, snapshot) {
+                      return ListView.builder(
+                        itemCount: snapshot.data?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          Task task = snapshot.data![index];
+                          return getMyView(value, task);
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-              Center(
-                child:FutureBuilder(
-                  future: _databaseServices.getTasksByCategory("Work"),
-                  builder: (context, snapshot) {
-                    return ListView.builder(
-                      itemCount: snapshot.data?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        Task task = snapshot.data![index];
-                        return getMyView(value, task);
-                      },
-                    );
-                  },
+                Center(
+                  child: FutureBuilder(
+                    future: _databaseServices.getTasksByCategory("Work"),
+                    builder: (context, snapshot) {
+                      return ListView.builder(
+                        itemCount: snapshot.data?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          Task task = snapshot.data![index];
+                          return getMyView(value, task);
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-              Center(
-                child: FutureBuilder(
-                  future: _databaseServices.getTasksByCategory("Others"),
-                  builder: (context, snapshot) {
-                    return ListView.builder(
-                      itemCount: snapshot.data?.length ?? 0,
-                      itemBuilder: (context, index) {
-                        Task task = snapshot.data![index];
-                        return getMyView(value, task);
-                      },
-                    );
-                  },
-                ),
-              )
-            ],
-          )),
-    ),
-
-
+                Center(
+                  child: FutureBuilder(
+                    future: _databaseServices.getTasksByCategory("Others"),
+                    builder: (context, snapshot) {
+                      return ListView.builder(
+                        itemCount: snapshot.data?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          Task task = snapshot.data![index];
+                          return getMyView(value, task);
+                        },
+                      );
+                    },
+                  ),
+                )
+              ],
+            )),
+      ),
     );
   }
 
@@ -113,7 +115,7 @@ class _HomePageState extends State<HomePage> {
     return FloatingActionButton(
       onPressed: () {
         Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) =>  AddTask()));
+            .push(MaterialPageRoute(builder: (context) => const AddTask()));
       },
       backgroundColor: Colors.tealAccent,
       tooltip: 'Add Task',
@@ -124,74 +126,118 @@ class _HomePageState extends State<HomePage> {
   Drawer drawer() {
     return Drawer(
       elevation: 5,
-        backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.background,
       child: ListView(
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(color: Theme.of(context).appBarTheme.backgroundColor),
-            child: Text(
+            decoration: BoxDecoration(
+                color: Theme.of(context).appBarTheme.backgroundColor),
+            child: const Text(
               'Task Reminder',
-              style: TextStyle(fontSize: 35,color: Colors.black),
+              style: TextStyle(fontSize: 35, color: Colors.black),
             ),
           ),
           ListTile(
-            title: Text('Profile',style: TextStyle(color:Colors.grey.shade900)),
-            leading: Icon(Icons.person,color:Colors.grey.shade900,),
+            title:
+                Text('Profile', style: TextStyle(color: Colors.grey.shade900)),
+            leading: Icon(
+              Icons.person,
+              color: Colors.grey.shade900,
+            ),
             onTap: () {
-
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => const ProfilePage()));
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const ProfilePage()));
             },
           ),
           ListTile(
-            title: Text('Theme',style: TextStyle(color:Colors.grey.shade900),),
-            leading: Icon(Icons.dark_mode, color: Colors.grey.shade900,),
+            title:
+            Text('Reminders', style: TextStyle(color: Colors.grey.shade900)),
+            leading: Icon(
+              Icons.task_alt,
+              color: Colors.grey.shade900,
+            ),
             onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder:(context) => const SettingPage()));
-              },
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const ReminderScreen()));
+            },
           ),
-
           ListTile(
-            title: Text('Share',style: TextStyle(color: Colors.grey.shade900)),
-            leading: Icon(Icons.share,color:Colors.grey.shade900,),
-            onTap: () async{
-              final Uri _url = Uri.parse('https://drive.google.com/file/d/1HQeEiw--yf6EiuHI0ZKTSD_jZCH3h1tS/view?usp=drivesdk');
-              if (!await launchUrl(_url)) {
-                throw Exception('Could not launch $_url');
+            title: Text(
+              'Theme',
+              style: TextStyle(color: Colors.grey.shade900),
+            ),
+            leading: Icon(
+              Icons.dark_mode,
+              color: Colors.grey.shade900,
+            ),
+            onTap: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const SettingPage()));
+            },
+          ),
+          ListTile(
+            title: Text('Share', style: TextStyle(color: Colors.grey.shade900)),
+            leading: Icon(
+              Icons.share,
+              color: Colors.grey.shade900,
+            ),
+            onTap: () async {
+              final Uri url0 = Uri.parse(
+                  'https://drive.google.com/file/d/1HQeEiw--yf6EiuHI0ZKTSD_jZCH3h1tS/view?usp=drivesdk');
+              if (!await launchUrl(url0)) {
+                throw Exception('Could not launch $url0');
               }
             },
           ),
           ListTile(
-            title: Text('Privacy Policy',style: TextStyle(color: Colors.grey.shade900)),
-            leading: Icon(Icons.policy,color:Colors.grey.shade900,),
-            onTap: () async{
-              final Uri _url = Uri.parse('https://drive.google.com/file/d/1HQeEiw--yf6EiuHI0ZKTSD_jZCH3h1tS/view?usp=drivesdk');
-              if (!await launchUrl(_url)) {
-                throw Exception('Could not launch $_url');
+            title: Text('Privacy Policy',
+                style: TextStyle(color: Colors.grey.shade900)),
+            leading: Icon(
+              Icons.policy,
+              color: Colors.grey.shade900,
+            ),
+            onTap: () async {
+              final Uri url = Uri.parse(
+                  'https://drive.google.com/file/d/1HQeEiw--yf6EiuHI0ZKTSD_jZCH3h1tS/view?usp=drivesdk');
+              if (!await launchUrl(url)) {
+                throw Exception('Could not launch $url');
               }
             },
           ),
           ListTile(
-            title: Text('Help',style: TextStyle(color: Colors.grey.shade900)),
-            leading: Icon(Icons.help,color: Colors.grey.shade900,),
+            title: Text('Help', style: TextStyle(color: Colors.grey.shade900)),
+            leading: Icon(
+              Icons.help,
+              color: Colors.grey.shade900,
+            ),
             onTap: () {},
           ),
-          ListTile(
-            title: Text('Version 1.0.0',style: TextStyle(color: Colors.black38),),
-            leading: Icon(Icons.layers,color: Colors.black38,),
+          const ListTile(
+            title: Text(
+              'Version 1.0.0',
+              style: TextStyle(color: Colors.black38),
+            ),
+            leading: Icon(
+              Icons.layers,
+              color: Colors.black38,
+            ),
           ),
         ],
       ),
     );
   }
-  GestureDetector getMyView(value,task,){
+
+  GestureDetector getMyView(
+    value,
+    task,
+  ) {
     return GestureDetector(
       onDoubleTap: () {
         // print(task.isCompleted);
         //  _databaseServices.deleteTask(task.id);
         value.update(task);
       },
-      onLongPress:() {
+      onLongPress: () {
         value.delete(task.id);
       },
       child: Padding(
@@ -199,11 +245,13 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            // color: Color((Random().nextDouble()*0xFFFFFF).toInt() <<0).withOpacity(1.0),
-            color: task.category =="Personal"?Colors.deepPurple.shade900:task.category == "Others"?Colors.indigoAccent:Colors.teal
-
-          ),
+              borderRadius: BorderRadius.circular(16),
+              // color: Color((Random().nextDouble()*0xFFFFFF).toInt() <<0).withOpacity(1.0),
+              color: task.category == "Personal"
+                  ? Colors.deepPurple.shade900
+                  : task.category == "Others"
+                      ? Colors.indigoAccent
+                      : Colors.teal),
           child: Row(children: [
             Expanded(
               child: Column(
@@ -214,22 +262,27 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Text(
                         "${task.title}",
-                        style:const TextStyle(
+                        style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white),
-
                       ),
-                      task.isCompleted==1?const Icon(Icons.task_alt,size: 20,):Container(),
+                      task.isCompleted == 1
+                          ? const Icon(
+                              Icons.task_alt,
+                              size: 20,
+                            )
+                          : Container(),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Text(
                     task.content,
                     style: TextStyle(fontSize: 15, color: Colors.grey[100]),
-
                   ),
-                  const SizedBox(height: 12,),
+                  const SizedBox(
+                    height: 12,
+                  ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -241,11 +294,8 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 4),
                       Text(
                         "${task.date.split(" ")[0]}",
-                        style:
-                        TextStyle(fontSize: 13, color: Colors.grey[100]),
-
+                        style: TextStyle(fontSize: 13, color: Colors.grey[100]),
                       ),
-
                       const SizedBox(width: 25),
                       Icon(
                         Icons.access_time_rounded,
@@ -254,20 +304,17 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Text(
                         " ${task.time} ",
-                        style:
-                        TextStyle(fontSize: 13, color: Colors.grey[100]),
-
+                        style: TextStyle(fontSize: 13, color: Colors.grey[100]),
                       ),
                       const SizedBox(
                         width: 9,
                       ),
                       Text(
-                        task.repeat=="None"?"No Repeat":task.repeat,
-                        style:TextStyle(fontSize: 13, color: Colors.grey[100]) ,
+                        task.repeat == "None" ? "No Repeat" : task.repeat,
+                        style: TextStyle(fontSize: 13, color: Colors.grey[100]),
                       ),
                     ],
                   ),
-
                 ],
               ),
             ),
@@ -285,11 +332,9 @@ class _HomePageState extends State<HomePage> {
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: Colors.white),
-
               ),
             ),
           ]),
-
         ),
       ),
     );
@@ -298,7 +343,7 @@ class _HomePageState extends State<HomePage> {
   AppBar appBar() {
     return AppBar(
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      iconTheme: IconThemeData(color: Colors.black),
+      iconTheme: const IconThemeData(color: Colors.black),
       title: const Text('Task Reminder'),
       titleTextStyle: const TextStyle(
         color: Colors.white,
@@ -335,15 +380,33 @@ class _HomePageState extends State<HomePage> {
       actions: <Widget>[
         IconButton(
           onPressed: () {
-           LocalNotificationService.showBasicNotification();
-         // notifiyerHelper.myShowSchduledNotification(16,DateTime.now().hour,DateTime.now().minute,"mo","jd");
+            // LocalNotificationService.showBasicNotification();
+
+            //after 10 seconds
+            // notifyHelper.zonedScheduleNotification();
+
+            //  notifyHelper.repeatNotification();
+
+            //notifyHelper.scheduleNotification(DateTime.now().hour + 1, DateTime.now().minute);
+            // notifyHelper.scheduleDailyTenAMNotification();
+            // notifyHelper.mscheduleDailyTenAMNotification(DateTime.now().day, DateTime.now().hour, DateTime.now().minute+1, 'ok', 'ok');
+            //notifyHelper.scheduleDailyTenAMNotification();
+            //notifyHelper.myShowSchduledNotification(DateTime.now().day, DateTime.now().hour, DateTime.now().minute, 'ok', 'ok');
+            // notifiyerHelper.myShowSchduledNotification(16,DateTime.now().hour,DateTime.now().minute,"mo","jd");
+
+           // notifyHelper.showNotification();
+          //  notifyHelper.my(body: "hiiiiiii",scheduledNotificationDateTime: DateTime.now().add(Duration(seconds: 1)));
+
+
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const NotificationScreen()));
           },
           icon: const Icon(Icons.notifications),
         ),
         IconButton(
           onPressed: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) =>  SettingPage()));
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingPage()));
           },
           icon: const Icon(Icons.settings),
         ),

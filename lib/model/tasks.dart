@@ -5,7 +5,7 @@ class Task {
   final String time;
   final String repeat;
   final String category;
-  final String id;
+  final int id;
   final int isCompleted;
 
   Task(
