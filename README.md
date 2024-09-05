@@ -90,17 +90,9 @@ samples, guidance on mobile development, and a full API reference.
 
 </div>
 
+<hr/>  
 
+## Demo  
 
-
-
-
-
-
-
-
-
-<hr>
-## Demo Video  
 
 [![demo](https://github.com/vinit105/DE_Project/blob/8d6ba339afbde147320768436f988b406fa88edf/screenshots/demo2.png)](https://github.com/user-attachments/assets/774d156d-6032-48a8-a020-bf24482e29bb)
