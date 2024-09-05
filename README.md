@@ -25,7 +25,7 @@ To get started with the Task Reminder Application, follow the instructions below
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/task-reminder-app.git
+   git clone https://github.com/vinit105/DE_Project.git  
 
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
