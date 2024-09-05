@@ -89,7 +89,18 @@ samples, guidance on mobile development, and a full API reference.
 <img alt="ScreenShot" src="./screenshots/responsive_demo3.png" height="200" />
 
 </div>
+
+
+
+
+
+
+
+
+
+
+
 <hr>
 ## Demo Video  
 
-[![demo](https://github.com/vinit105/BMI-Calculator/blob/c3273b2ce95d79bc171160c02df31dec3a940aaa/screenshot_01.png)](https://github.com/user-attachments/assets/89598c27-7250-4957-b192-6d8c380adf6b)
+[![demo](https://github.com/vinit105/DE_Project/blob/8d6ba339afbde147320768436f988b406fa88edf/screenshots/demo2.png)](https://github.com/user-attachments/assets/774d156d-6032-48a8-a020-bf24482e29bb)
